@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  name        String
+  createdAt   DateTime     @default(now())
+  habits      Habit[]
+  achivements Achivement[]
+}
+
+model Habit {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  color       String
+  targetDays  Int
+  schedule    String
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  habitLogs   HabitLog[]
+}
+
+model HabitLog {
+  id      Int      @id @default(autoincrement())
+  date    DateTime @default(now())
+  status  Statuses
+  mood    String?
+  note    String
+  habit   Habit    @relation(fields: [habitId], references: [id])
+  habitId Int
+}
+
+model Achivement {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  icon        String
+  earnedAt    DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+}
+
+enum Statuses {
+  Completed
+  Missed
+  NotCompleted
+}
