@@ -114,30 +114,28 @@ export async function getTodayHabits(userId: number, date: Date) {
 
 export async function calculateCurrentStreak(habitId: number) {
   const logs = await prisma.habitLog.findMany({
-    where: { habitId },
+    where: { habitId, status: Statuses.Completed },
     orderBy: { date: "desc" }
   });
 
   let streak = 0;
-  let current = new Date();
-  current.setHours(0, 0, 0, 0);
+  let checkDate = new Date();
+  checkDate.setHours(0, 0, 0, 0);
 
   for (const log of logs) {
     const logDate = new Date(log.date);
     logDate.setHours(0, 0, 0, 0);
 
-    if (log.status === "Completed" && logDate.getTime() === current.getTime()) {
-      streak++;
-      current.setDate(current.getDate() - 1);
-    } 
-    else {
-      break;
+    if (logDate.getTime() !== checkDate.getTime()) {
+      return streak;
     }
+
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
   }
 
   return streak;
 }
-
 
 export async function getHabitStats(habitId: number) {
   const totalCompleted = await prisma.habitLog.count({
